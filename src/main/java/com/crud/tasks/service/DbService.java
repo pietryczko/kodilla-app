@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +16,13 @@ public class DbService {
     public List<Task> getAllTasks() {
         return repository.findAll();
     }
-    public Task saveTask(final Task task) {
+    public Task saveTask(Task task) {
         return repository.save(task);
     }
-    public Task getTask(final Long taskId) throws TaskNotFoundException {
+    public Task getTask(Long taskId) throws TaskNotFoundException {
         return repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+    }
+    public void deleteTask(Long taskId){
+        repository.deleteById(taskId);
     }
 }
