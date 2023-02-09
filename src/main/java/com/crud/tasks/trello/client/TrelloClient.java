@@ -1,6 +1,8 @@
 package com.crud.tasks.trello.client;
 
+import com.crud.tasks.domain.CreatedTrelloCard;
 import com.crud.tasks.domain.TrelloBoardDto;
+import com.crud.tasks.domain.TrelloCardDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -29,17 +31,33 @@ public class TrelloClient {
     private String trelloUser;
 
     public List<TrelloBoardDto> getTrelloBoards() {
-        TrelloBoardDto[] boardsResponse = buildURL(trelloApiEndpoint, trelloUser, trelloAppKey, trelloToken);
+        TrelloBoardDto[] boardsResponse = buildUrlGetTrelloBoards(trelloApiEndpoint, trelloUser, trelloAppKey, trelloToken);
         return Optional.ofNullable(boardsResponse)
                 .map(Arrays::asList)
                 .orElse(Collections.emptyList());
     }
 
-    private TrelloBoardDto[] buildURL(String apiEndpoint, String userName, String key, String token) {
+    public CreatedTrelloCard createNewCard(TrelloCardDto trelloCardDto) {
+        URI url = UriComponentsBuilder.fromHttpUrl(trelloApiEndpoint + "/cards")
+                .queryParam("key", trelloAppKey)
+                .queryParam("token", trelloToken)
+                .queryParam("name", trelloCardDto.getName())
+                .queryParam("desc", trelloCardDto.getDescription())
+                .queryParam("pos", trelloCardDto.getPos())
+                .queryParam("idList", trelloCardDto.getListId())
+                .build()
+                .encode()
+                .toUri();
+
+        return restTemplate.postForObject(url, null, CreatedTrelloCard.class);
+    }
+
+    private TrelloBoardDto[] buildUrlGetTrelloBoards(String apiEndpoint, String userName, String key, String token) {
         URI url = UriComponentsBuilder.fromHttpUrl(apiEndpoint + "/members/" + userName + "/boards")
                 .queryParam("key", key)
                 .queryParam("token", token)
                 .queryParam("fields", "name,id")
+                .queryParam("lists", "all")
                 .build()
                 .encode()
                 .toUri();
