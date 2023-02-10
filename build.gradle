@@ -27,14 +27,15 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-//tasks.named('test') {
-// onlyIf {
-// project.hasProperty("runtests")
-// }
-// doLast {
-// useJUnitPlatform()
-// }
-
 tasks.named('test') {
-	useJUnitPlatform()
+	onlyIf {
+		project.hasProperty("runtests")
+	}
+	doLast {
+		useJUnitPlatform()
+	}
 }
+
+//tasks.named('test') {
+//	useJUnitPlatform()
+//}
