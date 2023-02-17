@@ -21,10 +21,10 @@ public class EmailScheduler {
     public void sendInformationEmail() {
         String taskValue;
         long size = taskRepository.count();
-        if (size > 1) {
-            taskValue = "tasks";
-        } else {
+        if (size == 1) {
             taskValue = "task";
+        } else {
+            taskValue = "tasks";
         }
 
         simpleEmailService.send(
