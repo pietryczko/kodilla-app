@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringJUnitWebConfig
@@ -64,8 +65,8 @@ class TaskControllerTest {
 
         //When & Then
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/v1/tasks/{tasksId}", 1)
-                .contentType(MediaType.APPLICATION_JSON))
+                        .get("/v1/tasks/{tasksId}", 1)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id", Matchers.is(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("Test")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content", Matchers.is("Test")));
@@ -82,12 +83,50 @@ class TaskControllerTest {
         String jsonContent = gson.toJson(taskDto);
 
         //When & Then
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/tasks")
+        mockMvc.perform(MockMvcRequestBuilders.post("/v1/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
                         .content(jsonContent))
+                .andExpect(MockMvcResultMatchers.status().is(200));
+    }
+
+    @Test
+    void shouldUpdateTask() throws Exception {
+        //Given
+        Task task = new Task(1L, "Test", "Test");
+        TaskDto taskDto = new TaskDto(10L, "Change", "Change");
+
+        when(service.saveTask(task)).thenReturn(task);
+        when(taskMapper.mapToTaskDto(any())).thenReturn(taskDto);
+
+        Gson gson = new Gson();
+        String jsonContent = gson.toJson(taskDto);
+
+        //When & Then
+        mockMvc.perform(MockMvcRequestBuilders.put("/v1/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("UTF-8")
+                .content(jsonContent))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", Matchers.is(10)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.title", Matchers.is("Change")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content", Matchers.is("Change")));
+
+    }
+    @Test
+    void shouldDeleteTask() throws Exception {
+        //Given
+        Task task = new Task(1L, "Test", "Test");
+        TaskDto taskDto = new TaskDto(10L, "Change", "Change");
+        when(taskMapper.mapToTask(taskDto)).thenReturn(task);
+
+        Gson gson = new Gson();
+        String jsonContent = gson.toJson(taskDto);
+
+        //When & Then
+        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/tasks/{taskId}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("UTF-8")
+                .content(jsonContent))
                 .andExpect(MockMvcResultMatchers.status().is(200));
     }
 }
